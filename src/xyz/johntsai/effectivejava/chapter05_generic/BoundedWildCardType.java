@@ -1,8 +1,6 @@
 package xyz.johntsai.effectivejava.chapter05_generic;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 
 
 /**
@@ -34,6 +32,59 @@ public class BoundedWildCardType {
         stack.popAll(objectCollection);
         System.out.println(stack);
 
+
+        //类型推导规则很复杂
+        Set<Integer> integerSet = new HashSet<>();
+        Set<Double> doubleSet = new HashSet<>();
+        //通过显示的类型参数告诉编译器使用哪种类型
+        Set<Number> numberSet = BoundedWildCardType.<Number>union(integerSet,doubleSet);
+    }
+    /**
+     * s1和s2都是生产者,根据PECS,应该是</? extends E>
+     * @param s1
+     * @param s2
+     * @param <E>
+     * @return
+     */
+    public static <E> Set<E> union(Set<? extends E> s1,Set<? extends E> s2){
+        Set<E> result = new HashSet<>(s1);
+        result.addAll(s2);
+        return result;
+    }
+    //原方法
+//    public static <T extends Comparable<T>> T max(List<T> list){return null;}
+
+    /**
+     * 对于参数list,它产生T实例,是生产者,故List<T>---->List<? extends T>
+     * 对于类型参数T(Comparable<T>) 它消费T实例并产生表示顺序关系的整值 故Comparable<T>--->Comparable<? super T>
+     *
+     *
+     * @param list
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<? super T>> T max(List<? extends T> list){
+        Iterator<? extends T> iterator = list.iterator();
+        T max = iterator.next();
+        while(iterator.hasNext()){
+            T next = iterator.next();
+            if(next.compareTo(max)>0)
+                max = next;
+        }
+        return max;
+    }
+
+    //before
+//    public static void swap(List<?> list,int i ,int j){
+//        list.set(i,list.set(j,list.get(i)));
+//    }
+    //after
+    public static void swap(List<?> list,int i,int j){
+        swapHelper(list,i,j);
+    }
+
+    private static<E> void swapHelper(List<E> list, int i, int j) {
+        list.set(i,list.set(j,list.get(i)));
     }
 }
 /**
@@ -118,5 +169,7 @@ class Stack<E>{
             c.add(pop());
         }
     }
+
+
 
 }

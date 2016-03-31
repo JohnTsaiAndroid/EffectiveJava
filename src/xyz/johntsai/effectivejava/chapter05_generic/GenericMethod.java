@@ -75,5 +75,66 @@ public class GenericMethod {
         Map<String,List<String>> factorymap = newHashMap();
 
         Collections.reverseOrder();
+
+        String[]strings = {"aa","bb","cc"};
+        UnaryFunction<String> sameString = identityFunction();
+        for(String string:strings){
+            System.out.println(sameString.apply(string));
+        }
+
+    }
+
+    public interface UnaryFunction<T>{
+        T apply(T arg);
+    }
+    private static UnaryFunction<Object> IDENTITY_FUNCTION =
+            new UnaryFunction<Object>() {
+                @Override
+                public Object apply(Object arg) {
+                    return arg;
+                }
+            };
+
+    @SuppressWarnings("unchecked")
+    public static <T> UnaryFunction<T> identityFunction(){
+        return (UnaryFunction<T>) IDENTITY_FUNCTION;
+    }
+
+    /**
+     * 每次都要创建一个,很浪费,而且它是无状态的.
+     * 泛型被具体化了,每个类型都需要一个恒等函数,但是它们被擦除后,就只需要一个泛型单例了.
+     * @param <T>
+     * @return
+     */
+    public static <T> UnaryFunction<T> identityFunction2(){
+        return new
+                UnaryFunction<T>() {
+                    @Override
+                    public T apply(T arg) {
+                        return arg;
+                    }
+                };
+    }
+
+    public interface Comparable<T>{
+        int compareto(T t);
+    }
+
+    /**
+     * 递归类型限制
+     * 通过包含该类型参数本身的表达式来限制类型参数是允许的.
+     * @param list
+     * @param <T>
+     * @return
+     */
+    public static <T extends Comparable<T>> T max(List<T> list){
+        Iterator<T> i = list.iterator();
+        T result = i.next();
+        while (i.hasNext()){
+            T t = i.next();
+            if(t.compareto(result)>0)
+                result = t;
+        }
+        return result;
     }
 }

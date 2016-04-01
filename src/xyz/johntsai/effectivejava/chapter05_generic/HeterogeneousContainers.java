@@ -21,36 +21,63 @@ public class HeterogeneousContainers {
      * 当一个类的字面文字被用在方法中,来传达编译时
      * 和运行时的类型信息时,被称作type token
      */
-    public class Favorites{
-        private Map<Class<?>,Object> favorites = new HashMap<>();
 
-        public <T> void putFavorates(Class<T> type,T instance){
-            if(type==null)
-                throw new NullPointerException("type is null");
-            favorites.put(type,instance);
-        }
 
-        public <T> T getFavorates(Class<T> type){
-//            return (T) favorites.get(type);
-            return type.cast(favorites.get(type));
-        }
-    }
+    public static void main(String[] args) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Favorites favorites = new Favorites();
+        favorites.putFavorates(String.class,"Java");
+        favorites.putFavorates(Integer.class,100);
+        favorites.putFavorates(Class.class,HeterogeneousContainers.class);
 
-    public static void main(String[] args) {
+        String string = favorites.getFavorates(String.class);
+        Integer integer = favorites.getFavorates(Integer.class);
+        Class<?> clazz = favorites.getFavorates(Class.class);
+
+        favorites.putFavorates(String.class,"aaa");
+
+        favorites.putFavorates(int.class,1);
+
+        System.out.println(favorites.size());
+
+        System.out.println(string+" "+integer+" "+clazz);
+
+
+
+        //类型擦除
         List<String> stringList = new ArrayList<>();
-        stringList.add("test");
+        List<Integer> integerList = new ArrayList<>();
+        System.out.println(stringList.getClass().toString());
+        System.out.println(integerList.getClass().toString());
+        System.out.println(stringList.getClass()==integerList.getClass());
 
-        try {
-            Method method = stringList.getClass().getMethod("add",Object.class);
-            method.invoke(stringList,5);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        System.out.println(stringList);
+
+
+        integerList.add(100);
+        Method method = integerList.getClass().getMethod("add",Object.class);
+        method.invoke(integerList,"abc");
+
+        System.out.println(integerList);
+
+
+
+    }
+}
+ class Favorites{
+    private Map<Class<?>,Object> favorites = new HashMap<>();
+
+    public <T> void putFavorates(Class<T> type,T instance){
+        if(type==null)
+            throw new NullPointerException("type is null");
+        favorites.put(type,instance);
+//        favorites.put(type,type.cast(instance));
     }
 
+    public <T> T getFavorates(Class<T> type){
+//            return (T) favorites.get(type);
+        return type.cast(favorites.get(type));
+    }
+
+     public int size(){
+         return favorites.size();
+     }
 }
